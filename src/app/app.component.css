@@ -1,0 +1,66 @@
+
+.w-100 {
+  width: 96%;
+}
+.w-50 {
+  width: 50%;
+}
+.container {
+  margin-top: 30px;
+  margin-left: 30px;
+  margin-right: 30px;
+}
+.result {
+  padding: 20px;
+}
+.mr-1 {
+  margin-right: 1em;
+}
+
+.example-sidenav {
+  display: block;
+  align-items: center;
+  justify-content: center;
+  width: 300px;
+  background: rgba(144, 163, 255, 0.5);
+  flex: 1 0 auto;
+}
+.divider {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.offer-card {
+  max-width: 200px;
+  margin: 10px;
+}
+.ripple {
+  cursor: pointer;
+  text-align: left;
+
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+
+  -webkit-user-drag: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.card-container {
+  display: inline-flex;
+  flex-direction: row;
+  overflow: hidden;
+}
+.plan-active {
+  background: #673ab7;
+  border: 1px;
+  border-radius: 3px;
+}
+.subtitle {
+  background-color: #673ab7;
+  color: #ffffff;
+}
+
+.toolbar {
+  position: fixed;
+  z-index: 999;
+}

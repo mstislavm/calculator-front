@@ -1,20 +1,154 @@
-<!--The content below is only a placeholder and can be replaced.-->
-<div style="text-align:center">
-  <h1>
-    Welcome to {{ title }}!
-  </h1>
-  <img width="300" alt="Angular Logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj4KICAgIDxwYXRoIGZpbGw9IiNERDAwMzEiIGQ9Ik0xMjUgMzBMMzEuOSA2My4ybDE0LjIgMTIzLjFMMTI1IDIzMGw3OC45LTQzLjcgMTQuMi0xMjMuMXoiIC8+CiAgICA8cGF0aCBmaWxsPSIjQzMwMDJGIiBkPSJNMTI1IDMwdjIyLjItLjFWMjMwbDc4LjktNDMuNyAxNC4yLTEyMy4xTDEyNSAzMHoiIC8+CiAgICA8cGF0aCAgZmlsbD0iI0ZGRkZGRiIgZD0iTTEyNSA1Mi4xTDY2LjggMTgyLjZoMjEuN2wxMS43LTI5LjJoNDkuNGwxMS43IDI5LjJIMTgzTDEyNSA1Mi4xem0xNyA4My4zaC0zNGwxNy00MC45IDE3IDQwLjl6IiAvPgogIDwvc3ZnPg==">
-</div>
-<h2>Here are some links to help you start: </h2>
-<ul>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://angular.io/tutorial">Tour of Heroes</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://github.com/angular/angular-cli/wiki">CLI Documentation</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://blog.angular.io/">Angular blog</a></h2>
-  </li>
-</ul>
+<mat-toolbar class="toolbar" color="primary" *ngIf="screenWidth < 840">
+  <button mat-mini-fab color="accent"><mat-icon>monetization_on</mat-icon></button>&nbsp;
+  Quote:
+  {{ total | number:'1.2-2' }} $
+</mat-toolbar>
+<mat-sidenav-container class="example-container">
+  <mat-sidenav #sidenav mode="side" class="example-sidenav result"
+                [fixedTopGap]="0"
+               [fixedBottomGap]="0"
+               [opened]="screenWidth > 840" [mode]="(screenWidth > 840) ? 'side' : 'over'"
+               >
+    <span class="heading" color="primary">Quote</span>
+    <mat-divider class="divider"></mat-divider>
+    <span><b>{{ activePlanName }}</b></span>
+    <mat-divider class="divider"></mat-divider>
+    <span>
+      {{ this.calcForm.get('startDate').value | date }} - {{ this.calcForm.get('endDate').value | date }}
+    </span>
+    <br/>
+    <span>Number of travelers: {{ this.numTravelers }}</span>
+    <br/>
+    <span *ngFor="let country of countries; let i=index">
+      {{ country.name }}
+      <span *ngIf="i + 1 < countries.length">,</span>
+    </span>
+    <mat-divider class="divider"></mat-divider>
+    <h2>{{ total | number:'1.2-2'}} $</h2>
+    <mat-divider class="divider"></mat-divider>
+    <button mat-raised-button color="primary">Continue</button>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <div class="container w-100" [formGroup]="calcForm">
+      <div class="heading" color="primary">
+        <mat-icon class="heading" color="primary">public</mat-icon>
+        Countries to travel
+      </div>
+      <mat-form-field class="w-100" appearance="outline">
+        <mat-label> Countries to travel</mat-label>
+        <mat-chip-list #chipList>
+          <mat-chip
+            *ngFor="let country of countries"
+            color="accent"
+            [selected]="true"
+            (removed)="remove(country)">
+            {{country.name}}
+            <mat-icon matChipRemove>cancel</mat-icon>
+          </mat-chip>
+          <input
+            placeholder="Type your destination(s)"
+            #countryInput
+            [formControl]="this.calcForm.controls['countriesControl']"
+            [matAutocomplete]="auto"
+            [matChipInputFor]="chipList"
+            [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+            [matChipInputAddOnBlur]="addOnBlur"
+            (matChipInputTokenEnd)="add($event)">
+        </mat-chip-list>
+        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
+          <mat-option *ngFor="let country of filteredCountries | async" [value]="country">
+            {{country.name}}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+      <div class="heading" color="primary">
+        <mat-icon class="heading" color="primary">directions_bike</mat-icon>
+        Travel activities
+      </div>
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label> Travel activities</mat-label>
+        <mat-select [formControl]="this.calcForm.controls['sportsControl']"
+                    name="Trip activities"
+                    placeholder="Choose your trip activities (goals)" required>
+          <mat-option *ngFor="let activity of this.activities" value="{{activity.type}}">{{activity.value}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div class="heading" color="primary">
+        <mat-icon class="heading" color="primary">date_range</mat-icon>
+        Travel dates
+      </div>
+      <div>
+        <mat-form-field appearance="outline" class="mr-1">
+          <mat-label>Start date</mat-label>
+          <input matInput [matDatepicker]="startDate" placeholder="Start date" formControlName="endDate" [required]
+                 autocomplete="off" [min]="minDate">
+          <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+          <mat-datepicker touchUi #startDate></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="mr-1">
+          <mat-label>End date</mat-label>
+          <input matInput [matDatepicker]="endDate" placeholder="Birth date" formControlName="endDate" [required]
+                 autocomplete="off" [min]="minDate">
+          <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
+          <mat-datepicker touchUi #endDate></mat-datepicker>
+        </mat-form-field>
+      </div>
+      <div class="heading" color="primary">
+        <mat-icon class="heading" color="primary">group_add</mat-icon>
+        Travelers
+      </div>
+      <div formArrayName="travelers" *ngFor="let traveler of this.travelers.controls; let i = index;">
+        <div [formGroupName]="i">
+          <mat-form-field appearance="outline" class="w-50 mr-1">
+            <mat-label>Name</mat-label>
+            <input matInput type="text" placeholder="First name, Last name" formControlName="name" autocomplete="off">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="mr-1">
+            <mat-label>Age</mat-label>
+            <input matInput placeholder="Age" formControlName="age" [required]
+                   autocomplete="off" type="number" [min]="0" max="120">
+          </mat-form-field>
+          <button mat-icon-button (click)="addTraveler()">
+            <mat-icon aria-label="Add traveler" color="primary">add_circle</mat-icon>
+          </button>
+          <span *ngIf="i > 0">
+            <button mat-icon-button (click)="removeTraveler(i)">
+              <mat-icon aria-label="Remove traveler" color="primary">remove_circle</mat-icon>
+            </button>
+          </span>
+        </div>
+      </div>
+      <div class="heading" color="primary">
+        <mat-icon class="heading" color="primary">beach_access</mat-icon>
+        Choose your insurance plan
+      </div>
+      <mat-divider class="divider"></mat-divider>
+      <div cdkDropListOrientation="horizontal" class="card-container" *ngFor="let plan of plans; let i=index">
+         <div [class]="activePlan === plan.type ? 'plan-active' : ''" (click)="changePlan(plan.type)">
+          <mat-card class="offer-card ripple"
+                    matRipple
+                    [matRippleCentered]="true"
+                    [matRippleDisabled]="false"
+                    [matRippleUnbounded]="false"
+          >
+            <mat-card-header  matBadge="{{ i + 1}}" matBadgePosition="after" matBadgeColor="accent">
+              <mat-card-title>
+                <span class="heading">{{ plan.name }}</span>
+              </mat-card-title>
+              <mat-card-subtitle *ngIf="plan.isPopular">
+                <mat-chip color="accent" selected>Most popular</mat-chip>
+              </mat-card-subtitle>
+            </mat-card-header>
+            <img mat-card-image src="./assets/{{ plan.type }}.png" alt="{{ plan.name }}">
+            <mat-card-content>
+              <ul *ngFor="let option of plan.options; let i=index">
+                <li>{{ option }}</li>
+              </ul>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+  </mat-sidenav-content>
 
+</mat-sidenav-container>
